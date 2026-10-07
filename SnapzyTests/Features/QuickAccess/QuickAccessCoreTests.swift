@@ -63,6 +63,7 @@ final class QuickAccessCoreTests: XCTestCase {
   // Keep MainActor ObservableObjects alive for the test process; XCTest scope
   // cleanup can crash while deinitializing app-level observable stores.
   private static var retainedActionStores: [QuickAccessActionConfigurationStore] = []
+  private static var retainedPinZoomModeStores: [QuickAccessPinZoomModeStore] = []
   private static var retainedPinWindowStates: [QuickAccessPinWindowState] = []
 
   func testQuickAccessSound_respectsGlobalAndQuickAccessPreferences() {
@@ -399,9 +400,12 @@ final class QuickAccessCoreTests: XCTestCase {
     let defaults = UserDefaults(suiteName: suiteName)!
     defer { defaults.removePersistentDomain(forName: suiteName) }
     let store = QuickAccessPinZoomModeStore(defaults: defaults)
+    Self.retainedPinZoomModeStores.append(store)
     XCTAssertEqual(store.mode, .fixedViewport)
     store.setMode(.windowFollowsImage)
-    XCTAssertEqual(QuickAccessPinZoomModeStore(defaults: defaults).mode, .windowFollowsImage)
+    let reloadedStore = QuickAccessPinZoomModeStore(defaults: defaults)
+    Self.retainedPinZoomModeStores.append(reloadedStore)
+    XCTAssertEqual(reloadedStore.mode, .windowFollowsImage)
   }
 
   func testQuickAccessPinWindowState_defaultsToFixedViewport() {
